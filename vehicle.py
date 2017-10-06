@@ -21,9 +21,12 @@ class Vehicle(pygame.sprite.Sprite):
         self.play_width = display.get_width()
         self.play_height = display.get_height()
 
+        self.rect = None
         self.theta = 0
-        self.x = 100
-        self.y = 100
+        self.x_0 = 100
+        self.y_0 = 100
+        self.x_1 = self.x_0
+        self.y_1 = self.y_0
         self.width = 30
         self.height = 50
         self.offset_x = 0
@@ -39,7 +42,10 @@ class Vehicle(pygame.sprite.Sprite):
         self.direction = 0
         self.drag = 0
 
-    def update(self):
+    def update(self, boundary):
+        self.x_0 = self.x_1
+        self.y_0 = self.y_1
+
         self.theta = ((self.theta + self.turn_mod * (self.left + self.right)) + 360) % 360
         self.direction = self.theta
         self.sprite = pygame.transform.rotate(self.car, -1 * self.theta)
@@ -66,11 +72,24 @@ class Vehicle(pygame.sprite.Sprite):
         elif self.speed < -2:
             self.speed = -2
 
-        self.x = self.x + self.speed * math.sin(self.theta * self.DEG)
-        self.y = self.y - self.speed * math.cos(self.theta * self.DEG)
+        self.x_1 = self.x_0 + self.speed * math.sin(self.theta * self.DEG)
+        self.y_1 = self.y_0 - self.speed * math.cos(self.theta * self.DEG)
+        self.rect = pygame.Rect([self.x_1 - self.offset_x, self.y_1 - self.offset_y,
+                                 self.sprite.get_width(), self.sprite.get_height()])
+
+        self.hit_boundary(boundary)
 
     def draw(self):
-        self.display.blit(self.sprite, (self.x - self.offset_x, self.y - self.offset_y))
+        self.display.blit(self.sprite, (self.x_1 - self.offset_x, self.y_1 - self.offset_y))
 
-    def hit_boundary(self):
-        pass
+    def hit_boundary(self, boundary):
+        def callback(rect):
+            def collide(one, two):
+                return rect.colliderect(two.rect)
+            return collide
+
+        collisions = pygame.sprite.spritecollide(self, boundary, False, callback(self.rect))
+        for wall in collisions:
+            self.x_1 = self.x_0 + wall.bump_x
+            self.y_1 = self.y_0 + wall.bump_y
+            self.speed = 0

@@ -17,7 +17,8 @@ class Game:
         self.display_size = display_size
         self.app_name = app_name
         self.vehicle = Vehicle(self.display)
-        self.boundary = Boundary(self.display, self.display_size)
+        self.boundary_init = Boundary(self.display, self.display_size)
+        self.boundary = self.boundary_init.walls
 
     def run(self):
         self.return_value = None
@@ -60,7 +61,7 @@ class Game:
                     self.vehicle.turn_mod = 1
 
     def update(self):
-        self.vehicle.update()
+        self.vehicle.update(self.boundary)
 
     def draw(self):
         self.display.fill(self.black)
