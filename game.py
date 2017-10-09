@@ -28,7 +28,7 @@ class Game:
             self.update()
             self.draw()
             self.clock.tick(self.fps)
-            pygame.display.set_caption("fps: " + str(self.clock.get_fps()))
+            pygame.display.set_caption("fps: " + str(round(self.clock.get_fps(), 1)))
 
         return self.return_value
 
