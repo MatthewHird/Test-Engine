@@ -9,10 +9,7 @@ class Vehicle(pygame.sprite.Sprite):
     white = (255, 255, 255)
     black = (0, 0, 0)
 
-    os.chdir("..")
-    os.chdir("..")
-    os.chdir("..")
-    car = pygame.image.load('car.png')
+    image = pygame.image.load('car.png')
 
     def __init__(self, display):
         pygame.sprite.Sprite.__init__(self)
@@ -23,15 +20,15 @@ class Vehicle(pygame.sprite.Sprite):
 
         self.rect = None
         self.theta = 0
-        self.x_0 = 100
-        self.y_0 = 100
+        self.x_0 = self.play_width / 2
+        self.y_0 = self.play_height / 2
         self.x_1 = self.x_0
         self.y_1 = self.y_0
-        self.width = 30
-        self.height = 50
+        self.width = self.image.get_width
+        self.height = self.image.get_height
         self.offset_x = 0
         self.offset_y = 0
-        self.sprite = None
+        self.image_trans = None
         self.accel = 0
         self.gas = 0
         self.brake = 0
@@ -48,7 +45,7 @@ class Vehicle(pygame.sprite.Sprite):
 
         self.theta = ((self.theta + self.turn_mod * (self.left + self.right)) + 360) % 360
         self.direction = self.theta
-        self.sprite = pygame.transform.rotate(self.car, -1 * self.theta)
+        self.image_trans = pygame.transform.rotate(self.image, -1 * self.theta)
         self.offset_x = 15 * abs(math.cos(self.theta * self.DEG)) \
                         + 25 * abs(math.sin(self.theta * self.DEG))
         self.offset_y = 25 * abs(math.cos(self.theta * self.DEG)) \
@@ -75,12 +72,12 @@ class Vehicle(pygame.sprite.Sprite):
         self.x_1 = self.x_0 + self.speed * math.sin(self.theta * self.DEG)
         self.y_1 = self.y_0 - self.speed * math.cos(self.theta * self.DEG)
         self.rect = pygame.Rect([self.x_1 - self.offset_x, self.y_1 - self.offset_y,
-                                 self.sprite.get_width(), self.sprite.get_height()])
+                                 self.image_trans.get_width(), self.image_trans.get_height()])
 
         self.hit_boundary(boundary)
 
     def draw(self):
-        self.display.blit(self.sprite, (self.x_1 - self.offset_x, self.y_1 - self.offset_y))
+        self.display.blit(self.image_trans, (self.x_1 - self.offset_x, self.y_1 - self.offset_y))
 
     def hit_boundary(self, boundary):
         def callback(rect):
